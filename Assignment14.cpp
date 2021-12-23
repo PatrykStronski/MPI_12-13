@@ -3,6 +3,8 @@
 
 #define n 1000
 
+using namespace std;
+
 void smod5(void *a, void *b, int *l, MPI_Datatype *type) {
 	int i;
 	for (i = 0; i < *l; i++)
@@ -10,10 +12,9 @@ void smod5(void *a, void *b, int *l, MPI_Datatype *type) {
 }
 
 void biggest_numb(void *a, void *b, int *l, MPI_Datatype *type) {
-	((int*)b)[0] = ((int*)a)[0];
-	for (int i = 1; i < *l; i++) {
-		if (((int*)a)[i] > ((int*)b)[0]) {
-			((int*)b)[0] = ((int*)a)[i];
+	for (int i = 0; i < *l; i++) {
+		if (((int*)a)[i] > ((int*)b)[i]) {		
+			((int*)b)[i] = ((int*)a)[i];
 		}
 	}
 }
@@ -23,7 +24,8 @@ int main(int argc, char **argv)
 	int rank, size, i;
 	int a[n];
 	int b[n];
-	int m[1];
+	int m[n];
+	int m_reduce;
 	MPI_Init(&argc, &argv);
 	MPI_Op op, max;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -38,7 +40,10 @@ int main(int argc, char **argv)
 	MPI_Op_create(&biggest_numb, 1, &max);
 	MPI_Reduce(a, m, n, MPI_INT, max , 0, MPI_COMM_WORLD);
 	MPI_Op_free(&max);
-	if (rank == 0) printf("max is %d\n", m[0]);
+	if (rank == 0) cout<<"Max using manually created function is: "<<m[0]<<","<<m[1]<<","<<m[2]<<endl;
+
+	MPI_Reduce(a, b, n, MPI_INT, MPI_MAX , 0, MPI_COMM_WORLD);
+	if (rank == 0) cout<<"Max using MPI_MAX is: "<<b[0]<<","<<b[1]<<","<<b[2]<<endl;
 
 	MPI_Finalize();
 }
