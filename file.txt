@@ -1,1 +1,9 @@
 One,two,three,four
+The printed “Invalid MIT-MAGIC-n Ubuntu Linux.
+
+Assignment 20
+The task here was to create a file, write some string there, and read this file.
+
+I have done the following way. I haveile, using ofstream and wrote the string using the stream. Then I closed the file.
+
+Then I initialized the MPI. The MPI opens the file with all ranks using in fh variable as MPI_File. Then the MPI_Fie the file using rank 0 and function remove.

@@ -1,23 +1,23 @@
 #include <stdio.h>
 #include "mpi.h"
 #include <string.h>
+#include<fstream>
 
+using namespace std;
 
 #define BUFSIZE 100
 #define READ_FILE "./filenew.txt"
 
-void save_file(char* to_write) {
-	FILE *f = fopen(READ_FILE, "w");
-	if (f != NULL) {
-    	fputs(to_write, f);
-    	fclose(f);
-  	}
-}
-
 int main(int argc, char **argv)
 {
-	int bufsize, rank, num, sum, a;
-	char to_write[10] = "0987654321";
+	int bufsize, rank, num, sum;
+	char to_write[15] = "0987654321\n123";
+	
+	ofstream myfile;
+  	myfile.open (READ_FILE);
+  	myfile << to_write;
+  	myfile.close();
+
 	MPI_Init(&argc, &argv);
 	MPI_Status status;
 	MPI_File fh;
@@ -26,14 +26,6 @@ int main(int argc, char **argv)
 	MPI_File_open(MPI_COMM_WORLD, READ_FILE, MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
 	MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR, "native", MPI_INFO_NULL);
 	sum = 0;
-	
-	save_file(to_write);
-	a = 666;
-	
-
-	MPI_Bcast(&a, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-	printf("Num: %d", a);
 
 	do {
 		MPI_File_read(fh, buf, BUFSIZE, MPI_CHAR, &status);
@@ -43,9 +35,11 @@ int main(int argc, char **argv)
 	} while (num >= BUFSIZE);
 	MPI_File_close(&fh);
 
-	printf("Amount of read characters for rank %d is %d\n", rank, (int)strlen(buf));
+	printf("Amount of read characters for rank %d is %d\n", rank, sum);
 
-	//remove(READ_FILE);
+	if (rank == 0) {
+		remove(READ_FILE);
+	}
 
 	MPI_Finalize();
 }
